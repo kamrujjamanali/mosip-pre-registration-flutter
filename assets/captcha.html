@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+
+    <script>
+      function onSubmit(token) {
+        CaptchaChannel.postMessage(token);
+      }
+
+      function resetCaptcha() {
+        grecaptcha.reset();
+      }
+    </script>
+  </head>
+
+  <body>
+    <div style="display:flex;justify-content:center;">
+      <div
+        class="g-recaptcha"
+        data-sitekey="__SITE_KEY__"
+        data-callback="onSubmit">
+      </div>
+    </div>
+  </body>
+</html>

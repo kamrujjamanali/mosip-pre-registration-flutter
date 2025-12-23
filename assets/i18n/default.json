@@ -1,0 +1,16 @@
+{
+    "languages": {
+      "eng": {
+        "nativeName": "English",
+        "locale": "en_US"
+      },
+      "ara": {
+        "nativeName": "العربية",
+        "locale": "ar_AR"
+      },
+      "fra": {
+        "nativeName": "Français",
+        "locale": "fr_FR"
+      }
+    }
+  }
