@@ -2,6 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' hide TextDirection;
+import 'package:mosip_pre_registration_mobile/core/utils/local_storage.dart';
+import 'package:mosip_pre_registration_mobile/models/audit_model.dart';
+import 'package:mosip_pre_registration_mobile/models/consent_dialog_data.dart';
+import 'package:mosip_pre_registration_mobile/models/language_capture_dialog_data.dart';
+import 'package:mosip_pre_registration_mobile/shared/dialog/consent_dialog.dart';
+import 'package:mosip_pre_registration_mobile/shared/dialog/language_capture_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_constants.dart';
@@ -346,6 +352,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     _loginIdValidator();
+    _openModal();
     resetCaptcha = false;
 
     if ((showSendOTP) && errorMessage.isEmpty && enableSendOtp) {
@@ -446,6 +453,102 @@ class _LoginScreenState extends State<LoginScreen> {
       captchaToken = token;
       enableSendOtp = token != null;
     });
+  }
+
+  Future<void> _openModal() async { 
+    final result = await showDialog<List<String>>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => LanguageCaptureDialog(
+          data: LanguageCaptureDialogData(
+            title: 'Select Language',
+            message:
+                'You can select minimum 1 and maximum 2 languages for data entry...',
+            errorText: 'Maximum language limit exceeded',
+            minLanguage: 1,
+            maxLanguage: 2,
+            mandatoryLanguages: ['eng'],
+            userPrefLanguage: 'eng',
+            languages: [
+              LanguageItem(code: 'eng', value: 'English'),
+              LanguageItem(code: 'ara', value: 'العربية'),
+              LanguageItem(code: 'fra', value: 'français'),
+              LanguageItem(code: 'hin', value: 'हिंदी'),
+              LanguageItem(code: 'tam', value: 'தமிழ்'),
+              LanguageItem(code: 'kan', value: 'ಕನ್ನಡ'),
+            ],
+            cancelButtonText: 'CANCEL',
+            submitButtonText: 'SUBMIT',
+            dir: TextDirection.ltr,
+          ),
+        ),
+      );
+
+      if (result == null || result.isEmpty) {
+        return;
+      }
+      /// ✅ User clicked SUBMIT → open consent modal
+      await openConsentPopup();
+  }
+
+  Future<void> openConsentPopup() async {
+    final result = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => ConsentDialog(
+        data: consentDataBuilding(),
+      ),
+    );
+    if (result != null) {
+      final auditObj = AuditModel(
+        actionUserId:
+            LocalStorageService.instance.getString('loginId') ?? '',
+        eventName: 'CONSENT',
+        description: jsonEncode({
+          'url': LocalStorageService.instance.getString('consentUrl'),
+          'description': 'Consent Accepted',
+        }),
+      );
+      await DataStorageService().logAudit(auditObj);
+    }
+  }
+
+  ConsentDialogData consentDataBuilding() {
+    return ConsentDialogData(
+      title: 'TERMS AND CONDITIONS',
+      cancelBtn: 'CANCEL',
+      userPreferredLangCode: 'eng',
+
+      alertMessageFirst: 'Alert message first',
+      alertMessageSecond: 'Alert message second',
+      alertMessageThird: 'Alert message third',
+      textDirectionArr: const [
+        TextDirection.ltr,
+      ],
+      data: [
+        ConsentLanguageBlock(
+          langCode: 'eng',
+          fileText: const [
+            'Your Agreement',
+            'I understand that MOSIP collects the below data during pre-registration, including my:',
+            '• Name',
+            '• Date of birth',
+            '• Gender',
+            '• Address',
+            '• Contact details',
+            '• Documents',
+            'I acknowledge that this information will be stored and processed solely for the purpose of facilitating my access to the MOSIP\'s sandbox environments.',
+            'I consent to the collection of this data to facilitate my access to MOSIP sandbox and services running within the environment.',
+          ],
+          labels: ConsentLabels(
+            title: 'Terms and Conditions',
+            subtitle: '',
+            acceptButton: 'ACCEPT',
+            checkCondition: 'Click to accept the terms and conditions',
+          ),
+        ),
+      ],
+    );
   }
 
   @override

@@ -3,8 +3,10 @@ import 'package:http/http.dart' as http;
 import 'package:mosip_pre_registration_mobile/core/constants/app_constants.dart';
 import 'package:mosip_pre_registration_mobile/core/services/app_config_service.dart';
 import 'package:mosip_pre_registration_mobile/models/applicant.model.dart';
+import 'package:mosip_pre_registration_mobile/models/audit_model.dart';
 import 'package:mosip_pre_registration_mobile/models/request_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 import 'config_service.dart';
 
@@ -13,6 +15,8 @@ class DataStorageService {
   static final DataStorageService _instance = DataStorageService._internal();
   factory DataStorageService() => _instance;
   DataStorageService._internal();
+
+  static DataStorageService get instance => _instance;
 
   late final String baseUrl;
   late final String preRegUrl;
@@ -29,7 +33,6 @@ class DataStorageService {
     // You'll set these via configService or environment
     baseUrl = appConfigService.get('BASE_URL');
     preRegUrl = appConfigService.get('PRE_REG_URL');
-    print('base url: $baseUrl');
   }
 
   // Helper to get current langCode
@@ -224,8 +227,11 @@ Future<List<Applicant>> getUsers(String userId) async {
 
   // ------------------- Config & Misc -------------------
   Future<dynamic> getConfig() async {
-    final url = '$baseUrl$preRegUrl${AppConstants.APPEND_URL['auth']}${AppConstants.APPEND_URL['config']}';
-    return _get(url);
+    // final url = '$baseUrl$preRegUrl${AppConstants.APPEND_URL['auth']}${AppConstants.APPEND_URL['config']}';
+    // return _get(url);
+
+    final String jsonString = await rootBundle.loadString('/mock-api/config.json');
+    return json.decode(jsonString);
   }
 
   Future<dynamic> getIdentityJson() async {
@@ -291,6 +297,39 @@ Future<List<Applicant>> getUsers(String userId) async {
       }
     } else {
       throw Exception('HTTP ${response.statusCode}: ${response.body}');
+    }
+  }
+
+  Future<void> logAudit(AuditModel auditRequest) async {
+    final request = RequestModel('', auditRequest);
+    final String baseUrl = this.baseUrl;
+    final String preRegUrl = this.preRegUrl;
+    final Uri url = Uri.parse('$baseUrl$preRegUrl/logAudit');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(request.toJson()),
+      );
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw {
+          'type': 'AUDIT_ERROR',
+          'message': 'Audit log failed',
+          'status': response.statusCode,
+        };
+      }
+    } catch (e) {
+      // IMPORTANT: normalize error (matches earlier fix)
+      if (e is http.ClientException) {
+        throw {
+          'type': 'NETWORK_ERROR',
+          'message': 'Unable to reach audit service',
+        };
+      }
+      rethrow;
     }
   }
 }

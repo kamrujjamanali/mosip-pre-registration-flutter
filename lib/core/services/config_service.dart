@@ -7,6 +7,8 @@ class ConfigService {
   factory ConfigService() => _instance;
   ConfigService._internal();
 
+  static ConfigService get instance => _instance;
+
   late SharedPreferences _prefs;
 
   // Initialize (call this early in main.dart)

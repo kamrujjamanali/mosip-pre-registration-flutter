@@ -10,6 +10,8 @@ class AuthService {
   factory AuthService() => _instance;
   AuthService._internal();
 
+  static AuthService get instance => _instance;
+
   final String cookieName = 'Authorization';
   String? _token;
   bool isCaptchaSuccess = false;
@@ -106,5 +108,9 @@ class AuthService {
   void updateUserPreferredLanguage(String lang) {
     userPreferredLang = lang;
     _prefs.setString('userPrefLanguage', lang);
+  }
+
+  Future<void> logout({bool force = false}) async {
+    await onLogout(force: force);
   }
 }

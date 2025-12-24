@@ -6,6 +6,8 @@ class AppConfigService {
   factory AppConfigService() => _instance;
   AppConfigService._internal();
 
+  static AppConfigService get instance => _instance;
+
   Map<String, dynamic> _config = {};
 
   Future<void> load() async {
@@ -14,6 +16,8 @@ class AppConfigService {
   }
 
   dynamic get(String key) => _config[key];
+
+  dynamic getVersion() => '1.0.0'; // Placeholder for app version
 
   Map<String, dynamic> get all => _config;
 }

@@ -9,6 +9,8 @@ class LocalStorageService {
 
   LocalStorageService._internal();
 
+  static LocalStorageService get instance => _instance;
+
   SharedPreferences? _prefs;
 
   Future<void> init() async {
