@@ -9,8 +9,10 @@ class AppLocalizations {
   AppLocalizations(this.locale);
 
   Future<void> load() async {
+    final map = {'en': 'eng', 'hi': 'hin', 'fr': 'fra'};
+    final code = map[locale.languageCode] ?? locale.languageCode;
     final jsonString =
-        await rootBundle.loadString('assets/i18n/${locale.languageCode}.json');
+        await rootBundle.loadString('assets/i18n/$code.json');
     _localizedStrings = json.decode(jsonString);
   }
 

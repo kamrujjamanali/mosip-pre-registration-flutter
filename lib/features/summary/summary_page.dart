@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class SummaryPage extends StatelessWidget {
-  final String appId;
+  final String? appId;
 
-  const SummaryPage({super.key, required this.appId});
+  const SummaryPage({super.key, this.appId});
 
   @override
   Widget build(BuildContext context) {

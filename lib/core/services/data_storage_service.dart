@@ -40,9 +40,11 @@ class DataStorageService {
 
   // ------------------- I18N -------------------
   Future<String> getI18NLanguageFiles(String langCode) async {
-    final response = await http.get(Uri.parse('/assets/i18n/$langCode.json'));
+    final map = {'en': 'eng', 'hi': 'hin', 'fr': 'fra'};
+    final code = map[langCode] ?? langCode;
+    final response = await http.get(Uri.parse('/assets/i18n/$code.json'));
     if (response.statusCode == 200) return response.body;
-    throw Exception('Failed to load language file: $langCode');
+    throw Exception('Failed to load language file: $code');
   }
 
   Future<String> getSecondaryLanguageLabels(String langCode) async {

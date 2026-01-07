@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class FileUploadPage extends StatelessWidget {
-  final String appId;
+  final String? appId;
 
-  const FileUploadPage({super.key, required this.appId});
+  const FileUploadPage({super.key, this.appId});
 
   @override
   Widget build(BuildContext context) {

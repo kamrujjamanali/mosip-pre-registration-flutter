@@ -16,59 +16,51 @@ class AppScaffold extends StatelessWidget {
     final String appVersion = AppConfigService.instance.getVersion() ?? '1.0.0';
 
     return Directionality(
-      textDirection: TextDirection.ltr, // later from LanguageProvider
+      textDirection: TextDirection.ltr, // Later can be updated from LanguageProvider
       child: Scaffold(
         appBar: AppHeader(
           isAuthenticated: isAuthenticated,
           onLogin: () {
-            Navigator.pushNamed(context, '/eng');
+            Navigator.pushReplacementNamed(context, '/login');
           },
           onHome: () {
-            Navigator.pushNamed(context, '/eng/dashboard');
+            Navigator.pushReplacementNamed(context, '/dashboard');
           },
           onLogout: () {
             AuthService.instance.logout();
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              '/eng',
-              (_) => false,
-            );
+            Navigator.pushReplacementNamed(context, '/login');
           },
           onLogoClick: () {
             if (isAuthenticated) {
-              Navigator.pushNamed(context, '/eng/dashboard');
+              Navigator.pushReplacementNamed(context, '/dashboard');
             } else {
-              Navigator.pushNamed(context, '/eng');
+              Navigator.pushReplacementNamed(context, '/login');
             }
           },
         ),
         drawer: AppDrawer(
           isAuthenticated: isAuthenticated,
           onLogin: () {
-            Navigator.pushNamed(context, '/eng');
+            Navigator.pushReplacementNamed(context, '/login');
           },
           onHome: () {
-            Navigator.pushNamed(context, '/eng/dashboard');
+            Navigator.pushReplacementNamed(context, '/dashboard');
           },
           onLogout: () {
             AuthService.instance.logout();
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              '/eng',
-              (_) => false,
-            );
+            Navigator.pushReplacementNamed(context, '/login');
           },
         ),
         body: Column(
           children: [
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(top: 68),
+                padding: const EdgeInsets.only(top: 68), // Adjust padding as needed
                 child: child,
               ),
             ),
             AppFooter(appVersion: appVersion),
-          ]
+          ],
         ),
       ),
     );

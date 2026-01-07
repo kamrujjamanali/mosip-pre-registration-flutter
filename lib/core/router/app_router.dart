@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mosip_pre_registration_mobile/core/layout/app_scaffold.dart';
 
 import '../../features/auth/login_page.dart';
 import '../../features/dashboard/dashboard_page.dart';
@@ -13,54 +14,80 @@ import 'app_routes.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
+    debugPrint('🧭 NAVIGATE TO → ${settings.name}');
+
+    // Wrap route creation with AppScaffold to include Navbar and Footer
     switch (settings.name) {
+      case '/':
       case AppRoutes.login:
-        return MaterialPageRoute(builder: (_) => const LoginScreen());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const AppScaffold(child: LoginScreen()),
+        );
 
       case AppRoutes.dashboard:
-        return MaterialPageRoute(builder: (_) => const DashboardPage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const AppScaffold(child: DashboardPage()),
+        );
 
       case AppRoutes.demographicNew:
         return MaterialPageRoute(
-          builder: (_) => const DemographicPage(),
+          settings: settings,
+          builder: (_) => const AppScaffold(child: DemographicPage()),
         );
 
       case AppRoutes.demographicEdit:
-        final appId = settings.arguments as String;
+        final appId = settings.arguments as String?;
         return MaterialPageRoute(
-          builder: (_) => DemographicPage(appId: appId),
+          settings: settings,
+          builder: (_) => AppScaffold(child: DemographicPage(appId: appId)),
         );
 
       case AppRoutes.fileUpload:
-        final appId = settings.arguments as String;
+        final appId = settings.arguments as String?;
         return MaterialPageRoute(
-          builder: (_) => FileUploadPage(appId: appId),
+          settings: settings,
+          builder: (_) => AppScaffold(child: FileUploadPage(appId: appId)),
         );
 
       case AppRoutes.booking:
-        final appId = settings.arguments as String;
+        final appId = settings.arguments as String?;
         return MaterialPageRoute(
-          builder: (_) => BookingPage(appId: appId),
+          settings: settings,
+          builder: (_) => AppScaffold(child: BookingPage(appId: appId)),
         );
 
       case AppRoutes.summary:
-        final appId = settings.arguments as String;
+        final appId = settings.arguments as String?;
         return MaterialPageRoute(
-          builder: (_) => SummaryPage(appId: appId),
+          settings: settings,
+          builder: (_) => AppScaffold(child: SummaryPage(appId: appId)),
         );
 
       case AppRoutes.aboutUs:
-        return MaterialPageRoute(builder: (_) => const AboutUsPage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const AppScaffold(child: AboutUsPage()),
+        );
 
       case AppRoutes.faq:
-        return MaterialPageRoute(builder: (_) => const FaqPage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const AppScaffold(child: FaqPage()),
+        );
 
       case AppRoutes.contact:
-        return MaterialPageRoute(builder: (_) => const ContactPage());
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const AppScaffold(child: ContactPage()),
+        );
 
+      // Fallback for unknown routes
       default:
         return MaterialPageRoute(
-          builder: (_) => const LoginScreen(),
+          settings: settings,
+          builder: (_) => const AppScaffold(child: LoginScreen()),  // Fallback to LoginScreen
         );
     }
   }

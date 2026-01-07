@@ -15,6 +15,7 @@ import '../../core/services/config_service.dart';
 import '../../core/services/data_storage_service.dart';
 import '../../core/utils/utils.dart';
 import 'auth_service.dart';
+import '../../core/router/app_routes.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -455,69 +456,74 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<void> _openModal() async { 
+  Future<void> _openModal() async {
     final result = await showDialog<List<String>>(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => LanguageCaptureDialog(
-          data: LanguageCaptureDialogData(
-            title: 'Select Language',
-            message:
-                'You can select minimum 1 and maximum 2 languages for data entry...',
-            errorText: 'Maximum language limit exceeded',
-            minLanguage: 1,
-            maxLanguage: 2,
-            mandatoryLanguages: ['eng'],
-            userPrefLanguage: 'eng',
-            languages: [
-              LanguageItem(code: 'eng', value: 'English'),
-              LanguageItem(code: 'ara', value: 'العربية'),
-              LanguageItem(code: 'fra', value: 'français'),
-              LanguageItem(code: 'hin', value: 'हिंदी'),
-              LanguageItem(code: 'tam', value: 'தமிழ்'),
-              LanguageItem(code: 'kan', value: 'ಕನ್ನಡ'),
-            ],
-            cancelButtonText: 'CANCEL',
-            submitButtonText: 'SUBMIT',
-            dir: TextDirection.ltr,
-          ),
-        ),
-      );
-
-      if (result == null || result.isEmpty) {
-        return;
-      }
-      /// ✅ User clicked SUBMIT → open consent modal
-      await openConsentPopup();
-  }
-
-  Future<void> openConsentPopup() async {
-    final result = await showDialog<String>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ConsentDialog(
-        data: consentDataBuilding(),
+      builder: (_) => LanguageCaptureDialog(
+        data: LanguageCaptureDialogData(
+          title: 'Select Language',
+          message: 'You can select minimum 1 and maximum 2 languages for data entry...',
+          errorText: 'Maximum language limit exceeded',
+          minLanguage: 1,
+          maxLanguage: 2,
+          mandatoryLanguages: ['en'],
+          userPrefLanguage: 'en',
+          languages: [
+            LanguageItem(code: 'eng', value: 'English'),
+            LanguageItem(code: 'ara', value: 'العربية'),
+            LanguageItem(code: 'fra', value: 'français'),
+            LanguageItem(code: 'hin', value: 'हिंदी'),
+            LanguageItem(code: 'tam', value: 'தமிழ்'),
+            LanguageItem(code: 'kan', value: 'ಕನ್ನಡ'),
+          ],
+          cancelButtonText: 'CANCEL',
+          submitButtonText: 'SUBMIT',
+          dir: TextDirection.ltr,
+        ),
       ),
     );
-    if (result != null) {
-      final auditObj = AuditModel(
-        actionUserId:
-            LocalStorageService.instance.getString('loginId') ?? '',
-        eventName: 'CONSENT',
-        description: jsonEncode({
-          'url': LocalStorageService.instance.getString('consentUrl'),
-          'description': 'Consent Accepted',
-        }),
-      );
-      await DataStorageService().logAudit(auditObj);
-    }
+
+    if (!mounted) return; // ✅ fixes lint
+
+    if (result == null || result.isEmpty) return;
+
+    await openConsentPopup(context); // ✅ safe now
   }
+
+    Future<void> openConsentPopup(BuildContext context) async {
+      final result = await showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        useRootNavigator: true,
+        builder: (_) => ConsentDialog(data: consentDataBuilding()),
+      );
+
+      if (result != 'ACCEPT') return;
+
+      try {
+        final auditObj = AuditModel(
+          actionUserId: LocalStorageService.instance.getString('loginId') ?? '',
+          eventName: 'CONSENT',
+          description: jsonEncode({
+            'url': LocalStorageService.instance.getString('consentUrl'),
+            'description': 'Consent Accepted',
+          }),
+        );
+        await DataStorageService().logAudit(auditObj);
+      } catch (_) {
+        debugPrint('audit failed, navigating anyway');
+      }
+
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pushReplacementNamed(AppRoutes.demographicNew);
+    }
 
   ConsentDialogData consentDataBuilding() {
     return ConsentDialogData(
       title: 'TERMS AND CONDITIONS',
       cancelBtn: 'CANCEL',
-      userPreferredLangCode: 'eng',
+      userPreferredLangCode: 'en',
 
       alertMessageFirst: 'Alert message first',
       alertMessageSecond: 'Alert message second',
@@ -527,7 +533,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ],
       data: [
         ConsentLanguageBlock(
-          langCode: 'eng',
+          langCode: 'en',
           fileText: const [
             'Your Agreement',
             'I understand that MOSIP collects the below data during pre-registration, including my:',

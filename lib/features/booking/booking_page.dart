@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class BookingPage extends StatelessWidget {
-  final String appId;
+  final String? appId;
 
-  const BookingPage({super.key, required this.appId});
+  const BookingPage({super.key, this.appId});
 
   @override
   Widget build(BuildContext context) {
